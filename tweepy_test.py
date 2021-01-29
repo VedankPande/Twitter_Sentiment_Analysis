@@ -1,4 +1,5 @@
 import tweepy
+import pandas as pd
 
 API_KEY = '4EWB8qGkqRfMsnuF9wAIF1OE1'
 API_SECRET_KEY = 'S3EMY5ETmxiUtUYr2g1ynbdGvRisSIuCdeJK1Gr0AbevQACcjb'
@@ -30,27 +31,35 @@ def stream_tweets(keyword):
     myStream.filter(track=[keyword])        
         
 #search past tweets with keywords
-def search_tweets(keyword,length):
+def search_tweets(keyword,res_type='mixed',lang='en',length=10):
     try:
         tweets = tweepy.Cursor(api.search,
         q=f"\"{keyword}\" -filter:retweets",
-        lang='en',
+        result_type =res_type,
+        lang=lang,
         tweet_mode = 'extended'
         ).items(length)
     except Exception as e:
         print(e)
+    return tweets
 
-    tweets_list = [tweet.full_text for tweet in tweets]
-    print(tweets_list)
+df = pd.DataFrame(columns=['user','status','likes','rt'])
 
 #search for a particular users tweets
 def search_user_status(user_name,num_tweets):
     tweets = api.user_timeline(screen_name = user_name, count = num_tweets)
     for tweet in tweets:
-        print(tweet.text)
-
-search_user_status('ManUtd', 10)
+        print(f"User: {tweet.user.screen_name} \n Status: {tweet.text}")
 
 
+# Function to update a df with new data
+def update_df(data_frame,keyword,num=10):
+
+    tweets_list = search_tweets(keyword,length=num)
+    table = [[tweet.user.screen_name,tweet.full_text,tweet.favorite_count,tweet.retweet_count] for tweet in tweets_list]
+    data_frame  = data_frame.append(pd.DataFrame(data=table,columns=['user','status','likes','rt']))
+    return data_frame
 
 
+data = update_df(df,'Rashford',num=100)
+data.to_csv('Rashford.csv')
