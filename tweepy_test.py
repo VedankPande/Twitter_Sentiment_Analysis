@@ -3,10 +3,10 @@ import logging
 import time
 import pandas as pd
 
-API_KEY = '4EWB8qGkqRfMsnuF9wAIF1OE1'
-API_SECRET_KEY = 'S3EMY5ETmxiUtUYr2g1ynbdGvRisSIuCdeJK1Gr0AbevQACcjb'
-ACCESS_TOKEN = '896024023531913217-TyclTbVKs6ZEPL3gRQeQ1cbKdtvighM'
-ACCESS_TOKEN_SECRET = 'oNVVcEt7015skXLQwpgjajcEujZieIsSnvRizFSx2QQko'
+API_KEY = 
+API_SECRET_KEY = 
+ACCESS_TOKEN = 
+ACCESS_TOKEN_SECRET = 
 
 #class for tweepy StreamerListener
 class StreamerListener(tweepy.StreamListener):
