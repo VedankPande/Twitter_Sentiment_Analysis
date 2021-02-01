@@ -1,4 +1,6 @@
 import tweepy
+import logging
+import time
 import pandas as pd
 
 API_KEY = '4EWB8qGkqRfMsnuF9wAIF1OE1'
@@ -31,7 +33,7 @@ def stream_tweets(keyword):
     myStream.filter(track=[keyword])        
         
 #search past tweets with keywords
-def search_tweets(keyword,res_type='mixed',lang='en',length=10):
+def search_tweets(keyword,res_type='popular',lang='en',length=10):
     try:
         tweets = tweepy.Cursor(api.search,
         q=f"\"{keyword}\" -filter:retweets",
@@ -43,23 +45,52 @@ def search_tweets(keyword,res_type='mixed',lang='en',length=10):
         print(e)
     return tweets
 
-df = pd.DataFrame(columns=['user','status','likes','rt'])
+df = pd.DataFrame(columns=['id','user','status','likes','rt'])
 
 #search for a particular users tweets
 def search_user_status(user_name,num_tweets):
     tweets = api.user_timeline(screen_name = user_name, count = num_tweets)
-    for tweet in tweets:
-        print(f"User: {tweet.user.screen_name} \n Status: {tweet.text}")
+    return tweets
 
 
 # Function to update a df with new data
+#TODO: change code according to new GET function
 def update_df(data_frame,keyword,num=10):
 
     tweets_list = search_tweets(keyword,length=num)
-    table = [[tweet.user.screen_name,tweet.full_text,tweet.favorite_count,tweet.retweet_count] for tweet in tweets_list]
-    data_frame  = data_frame.append(pd.DataFrame(data=table,columns=['user','status','likes','rt']))
+    table = [[tweet.id,tweet.user.screen_name,tweet.full_text,tweet.favorite_count,tweet.retweet_count] for tweet in tweets_list]
+    data_frame  = data_frame.append(pd.DataFrame(data=table,columns=['id','user','status','likes','rt']))
     return data_frame
+    
 
+# get replies for tweet, may take a while due to rate limiting
+def get_replies(tweet_cursor):
+    for tweet in tweet_cursor:
+        target_user = '@'+tweet.user.screen_name
+        test_tweet_id = tweet.id
+        print(f"target user: {target_user}, tweet_id: {test_tweet_id}")
+        replies = tweepy.Cursor(api.search,q='to:{}'.format(target_user),since_id=test_tweet_id).items()
+        while True:
+            try:
+                reply = replies.next()
+                if not hasattr(reply, 'in_reply_to_status_id_str'):
+                    continue
+                if reply.in_reply_to_status_id == test_tweet_id:
+                    print("reply of tweet:{}".format(reply.text))
 
-data = update_df(df,'Rashford',num=100)
-data.to_csv('Rashford.csv')
+            except tweepy.RateLimitError as e:
+                print("Twitter api rate limit reached {}".format(e))
+                time.sleep(60)
+                continue
+
+            except tweepy.TweepError as e:
+                print("Tweepy error occured:{}".format(e))
+                break
+
+            except StopIteration:
+                print("iteration stopped")
+                break
+
+            except Exception as e:
+                print("Failed while fetching replies {}".format(e))
+                break
