@@ -2,6 +2,7 @@ import tweepy
 import logging
 import time
 import pandas as pd
+from treelib import Node,Tree
 
 API_KEY = '4EWB8qGkqRfMsnuF9wAIF1OE1'
 API_SECRET_KEY = 'S3EMY5ETmxiUtUYr2g1ynbdGvRisSIuCdeJK1Gr0AbevQACcjb'
@@ -28,6 +29,8 @@ api = tweepy.API(auth)
 
 #stream real time tweets with filter
 def stream_tweets(keyword):
+
+
     myStreamListener = StreamerListener()
     myStream = tweepy.Stream(auth = api.auth,listener=myStreamListener)
     myStream.filter(track=[keyword])        
@@ -45,10 +48,8 @@ def search_tweets(keyword,res_type='popular',lang='en',length=10):
         print(e)
     return tweets
 
-df = pd.DataFrame(columns=['id','user','status','likes','rt'])
-
 #search for a particular users tweets
-def search_user_status(user_name,num_tweets):
+def search_user_status(user_name,num_tweets=1):
     tweets = api.user_timeline(screen_name = user_name, count = num_tweets)
     return tweets
 
@@ -58,25 +59,39 @@ def search_user_status(user_name,num_tweets):
 def update_df(data_frame,keyword,num=10):
 
     tweets_list = search_tweets(keyword,length=num)
-    table = [[tweet.id,tweet.user.screen_name,tweet.full_text,tweet.favorite_count,tweet.retweet_count] for tweet in tweets_list]
+    table = [[tweet.id,
+            tweet.user.screen_name,
+            tweet.full_text,tweet.favorite_count,
+            tweet.retweet_count] for tweet in tweets_list]
     data_frame  = data_frame.append(pd.DataFrame(data=table,columns=['id','user','status','likes','rt']))
     return data_frame
     
 
-# get replies for tweet, may take a while due to rate limiting
-def get_replies(tweet_cursor):
+# get replies for tweet from a specific user timeline, may take a while due to rate limiting
+def get_user_tweet_replies(tweet_cursor):
+    tree = Tree()
+    tree.create_node("Tweets","tweets")
+
+    #use max_tweet to limit the search 
+    max_tweet = None
+
     for tweet in tweet_cursor:
+
+        tree.create_node(tweet.id,tweet.id,parent="tweets",data=tweet.text)
         target_user = '@'+tweet.user.screen_name
         test_tweet_id = tweet.id
-        print(f"target user: {target_user}, tweet_id: {test_tweet_id}")
-        replies = tweepy.Cursor(api.search,q='to:{}'.format(target_user),since_id=test_tweet_id).items()
+        replies = tweepy.Cursor(api.search,q='to:{}'.format(target_user),
+                                result_type='recent',since_id=test_tweet_id,
+                                max_id=max_tweet).items(100)
+
         while True:
             try:
+                #search for replies to given tweet
                 reply = replies.next()
-                if not hasattr(reply, 'in_reply_to_status_id_str'):
+                if not hasattr(reply, 'in_reply_to_status_id'):
                     continue
                 if reply.in_reply_to_status_id == test_tweet_id:
-                    print("reply of tweet:{}".format(reply.text))
+                    tree.create_node(reply.user.screen_name,reply.id,parent=test_tweet_id,data=reply.text)
 
             except tweepy.RateLimitError as e:
                 print("Twitter api rate limit reached {}".format(e))
@@ -94,3 +109,11 @@ def get_replies(tweet_cursor):
             except Exception as e:
                 print("Failed while fetching replies {}".format(e))
                 break
+        
+            #limit search space for tweets between last and current tweet
+        max_tweet = tweet.id
+    return tree
+
+tweets = search_user_status('OfficialFPL',13)
+tree = get_user_tweet_replies(tweets)
+print(tree,type(tree))
