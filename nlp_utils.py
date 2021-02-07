@@ -5,6 +5,9 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 def analyze_data(tweet_dict : dict):
     pass
 
+#TODO: add vader sent code here
+def get_sentiment(text)->float:
+    pass
 
 
 

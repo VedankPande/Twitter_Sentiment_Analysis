@@ -5,10 +5,10 @@ import pickle
 import regex as re
 
 
-API_KEY = '4EWB8qGkqRfMsnuF9wAIF1OE1'
-API_SECRET_KEY = 'S3EMY5ETmxiUtUYr2g1ynbdGvRisSIuCdeJK1Gr0AbevQACcjb'
-ACCESS_TOKEN = '896024023531913217-TyclTbVKs6ZEPL3gRQeQ1cbKdtvighM'
-ACCESS_TOKEN_SECRET = 'oNVVcEt7015skXLQwpgjajcEujZieIsSnvRizFSx2QQko'
+API_KEY = 
+API_SECRET_KEY = 
+ACCESS_TOKEN = 
+ACCESS_TOKEN_SECRET = 
 
 #class for tweepy StreamerListener
 class StreamerListener(tweepy.StreamListener):
@@ -103,17 +103,3 @@ def get_user_tweet_replies(tweet_cursor):
             #limit search space for tweets between last and current tweet
         max_tweet = tweet.id
     return tree
-
-if __name__=='__main__':
-    tweets = search_user_status('OfficialFPL',10)
-    tweets_tree = get_user_tweet_replies(tweets)
-    #print(tweets_tree)
-    #data = tweets_tree.to_dict(with_data=True)
-    #print(data)
-    #with open('C:/Users/anike/Desktop/code/data','rb') as f:
-    #    db = pickle.load(f)
-    #    print(type(db))
-    #    for keys in db['Tweets']['children']:
-    #        print(keys.keys())
-    #
-    #   f.close()
