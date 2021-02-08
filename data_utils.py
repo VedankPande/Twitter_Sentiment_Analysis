@@ -1,24 +1,29 @@
 import pickle
 import regex as re
-import treelib
 
-#TODO: add clean tweet code
-def clean_tweet(tweet)->object:
-    '''Removes links and special characters from tweet text'''
+def clean_tweet(tweet)->'String':
+    '''
+    Removes links and special characters from tweet text
+    '''
+    
     return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t]) |(\w+:\/\/\S+)", " ", tweet).split()) 
 
-#TODO: add pickle save code
-def save_data(tree_data : ,topic='temp'):
+def save_data(data: dict,topic='temp'):
     '''saves data from tree in pickle file
         tree_data: treelib object with twitter data
         topic: keyword used to search for tweets'''
 
-    data = tree_data.to_dict(with_data=True)
-    with open(f'C:/Users/anike/Desktop/code/{topic}','wb') as f:
+    with open(f'C:/Users/anike/Desktop/code/twitter_sent/{topic}.pickle','wb') as f:
         pickle.dump(data,f)
         f.close()
 
-def load_data(path = 'C:/Users/anike/Desktop/code/data.txt')->dict:
+def load_data(file_name)->dict:
+    '''
+    loads pickle file
+    file_name: pass a string with the files name
+    '''
+    path = f'C:/Users/anike/Desktop/code/twitter_sent/{file_name}'
     with open(path,'rb') as f:
         data = pickle.load(f)
         return data
+
