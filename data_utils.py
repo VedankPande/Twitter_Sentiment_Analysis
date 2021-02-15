@@ -1,5 +1,6 @@
 import pickle
 import regex as re
+import treelib
 
 def clean_tweet(tweet)->'String':
     '''
@@ -26,4 +27,8 @@ def load_data(file_name)->dict:
     with open(path,'rb') as f:
         data = pickle.load(f)
         return data
+
+def add_tree_node(tree,tweet,parent=None):
+    data = {'text':clean_tweet(tweet.full_text),'likes':tweet.favorite_count,'retweets':tweet.retweet_count}
+    tree.create_node(tweet.id,tweet.id,parent = parent,data=data)
 
