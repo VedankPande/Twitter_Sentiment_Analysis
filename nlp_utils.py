@@ -12,7 +12,6 @@ def get_sentiment_dict(text)->dict:
     sent_dict = sent_analyzer.polarity_scores(text)
     return sent_dict
 
-#TODO: add NLP code for dict here
 def analyze_data(tree_data):
     '''
     returns total sentiment value for the whole topic/keyword
@@ -23,6 +22,7 @@ def analyze_data(tree_data):
     #for each node, add it's sentiment score along with the reply score's
     for tweet in tree_data.children(root.identifier):
 
+        #compound sentiment for the root tweet
         sent_score = get_sentiment_dict(tweet.data['text'])['compound']
 
         #since most people that retweet, also like the tweet, assign lower weight to retweets

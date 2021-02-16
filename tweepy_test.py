@@ -1,12 +1,12 @@
 import tweepy
 import time
 from treelib import Tree
-from data_utils import clean_tweet,add_tree_node
+from data_utils import add_tree_node
 
-API_KEY = 
-API_SECRET_KEY = 
-ACCESS_TOKEN = 
-ACCESS_TOKEN_SECRET = 
+API_KEY = 'P2OwbCH283xgJX8p8LPomlf5O'
+API_SECRET_KEY = '7Mh2sGiIxS55aOSXnIW8oI6u3V99xrtduXAhFO1ZB19tzFvLag'
+ACCESS_TOKEN = '896024023531913217-atwUWmov7IgldZhUGe0WdAKK62aglc2'
+ACCESS_TOKEN_SECRET = '7Jyz6k1KNPvvIaR3sU2DKFeu55ckNeRFVjPiTJL35e5FZ'
 
 #class for tweepy StreamerListener
 class StreamerListener(tweepy.StreamListener):
@@ -23,7 +23,7 @@ class StreamerListener(tweepy.StreamListener):
 auth = tweepy.OAuthHandler(API_KEY,API_SECRET_KEY)
 auth.set_access_token(ACCESS_TOKEN,ACCESS_TOKEN_SECRET)
 
-#api object
+# api object
 api = tweepy.API(auth,wait_on_rate_limit=True,wait_on_rate_limit_notify=True)
 
 #stream real time tweets with filter
@@ -32,8 +32,21 @@ def stream_tweets(keyword):
     myStream = tweepy.Stream(auth = api.auth,listener=myStreamListener)
     myStream.filter(track=[keyword])        
         
-#search past tweets with keywords
-def search_tweets(keyword,res_type='popular',lang='en',length=10):
+# search past tweets with keywords
+def search_tweets(keyword,res_type='recent',lang='en',length=10)->Tree:
+    '''
+    |  Returns tree with tweet data based on input keyword\n
+    Parameters:\n
+    |  keyword: search query for twitter search\n
+    |  res_type: refer to twepy docs for options\n
+    |  lang: tweet language\n
+    | length: number of tweets to return\n
+    '''
+
+    #init tree
+    tree = Tree()
+    tree.create_node("Tweets","tweets")
+
     try:
         # search tweets with params    
         tweets = tweepy.Cursor(api.search,
@@ -42,30 +55,46 @@ def search_tweets(keyword,res_type='popular',lang='en',length=10):
         lang=lang,
         tweet_mode = 'extended'
         ).items(length)
+        
+        #add tweets to tree
+        for tweet in tweets:
+            add_tree_node(tree,tweet,parent='tweets')
+        
     except Exception as e:
         print(e)
     #return tweet cursor
-    return tweets
+    return tree
 
 #search for a particular users tweets
-def search_user_status(user_name,num_tweets=1):
+def search_user_status(user_name,num_tweets=10  ):
+    
     #return tweet cursor for user timeline
     return api.user_timeline(screen_name = user_name, count = num_tweets,tweet_mode="extended",lang='en')
     
 
 # get replies for tweet from a specific user timeline, may take a while due to rate limiting
-def get_user_tweet_replies(tweet_cursor,num_replies=100):
+def get_user_tweet_replies(tweet_cursor,num_replies=100)->Tree:
+    '''
+    |  Returns a treelib object with tweets, their respective replies and event data (likes and retweets)\n
+    |  May take a while to execute if the Twitter API rate limit is reached\n
+    '''
+
+    #init tree
     tree = Tree()
     tree.create_node("Tweets","tweets")
 
     #use max_tweet to limit the search 
     max_tweet = None
 
+    # iterate through fetched tweets
     for tweet in tweet_cursor:
         
         add_tree_node(tree,tweet,parent='tweets')
+
         #get @ of target Twitter account
         target_user = '@'+tweet.user.screen_name
+        
+        #id for the root tweet (used to find replies to the root tweet)
         tweet_id = tweet.id
         replies = tweepy.Cursor(api.search,q='to:{}'.format(target_user),
                                 result_type='recent',since_id= tweet_id,
@@ -77,12 +106,14 @@ def get_user_tweet_replies(tweet_cursor,num_replies=100):
                 reply = replies.next()
 
                 #check if tweet is a reply
-                if not hasattr(reply, 'in_reply_to_status_id'):
+                if not hasattr(reply,'in_reply_to_status_id'):
                     continue
+
                 #check if tweet is in reply to our original tweet
                 if reply.in_reply_to_status_id == tweet_id:
                     add_tree_node(tree,reply,parent=tweet_id)
 
+            #handling various exceptions
             except tweepy.RateLimitError as e:
                 print("Twitter api rate limit reached {}".format(e))
                 time.sleep(60)
@@ -105,3 +136,6 @@ def get_user_tweet_replies(tweet_cursor,num_replies=100):
         #limit search space for tweets between last and current tweet
         max_tweet = tweet.id
     return tree
+
+if __name__ == "__main__":
+    pass
