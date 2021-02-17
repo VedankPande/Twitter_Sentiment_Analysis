@@ -30,7 +30,11 @@ api = tweepy.API(auth,wait_on_rate_limit=True,wait_on_rate_limit_notify=True)
 def stream_tweets(keyword):
     myStreamListener = StreamerListener()
     myStream = tweepy.Stream(auth = api.auth,listener=myStreamListener)
-    myStream.filter(track=[keyword])        
+    myStream.filter(track=[keyword])
+
+#return search result for a query
+def search(keyword):
+    return api.search_users(keyword,count=5)  
         
 # search past tweets with keywords
 def search_tweets(keyword,res_type='recent',lang='en',length=10)->Tree:
@@ -66,10 +70,17 @@ def search_tweets(keyword,res_type='recent',lang='en',length=10)->Tree:
     return tree
 
 #search for a particular users tweets
-def search_user_status(user_name,num_tweets=10  ):
+def search_user_status(user_name,num_tweets=10):
     
     #return tweet cursor for user timeline
-    return api.user_timeline(screen_name = user_name, count = num_tweets,tweet_mode="extended",lang='en')
+    try:
+        return api.user_timeline(screen_name = user_name, count = num_tweets,tweet_mode="extended",lang='en')
+
+    except tweepy.TweepError as e:
+        print("Did you mean:\n")
+        for user in search(user_name):
+            print(f"{user.screen_name}\n or \n")
+                    
     
 
 # get replies for tweet from a specific user timeline, may take a while due to rate limiting
@@ -121,9 +132,7 @@ def get_user_tweet_replies(tweet_cursor,num_replies=100)->Tree:
 
             except tweepy.TweepError as e:
                 print("Tweepy error occured:{}".format(e))
-                print("sleeping for 60 seconds")
-                time.sleep(60)
-                continue
+                break
 
             except StopIteration:
                 print("iteration stopped")

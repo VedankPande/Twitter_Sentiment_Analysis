@@ -1,6 +1,8 @@
 import pickle
 import regex as re
-import treelib
+import pandas as pd
+from tqdm import tqdm
+
 
 def clean_tweet(tweet)->str:
     '''
@@ -39,3 +41,17 @@ def add_tree_node(tree,tweet,parent=None):
     data = {'timestamp':tweet.created_at, 'text':clean_tweet(tweet.full_text), 'likes':tweet.favorite_count, 'retweets':tweet.retweet_count}
     tree.create_node(tweet.id, tweet.id, parent=parent, data=data)
 
+def get_dataframe(tree):
+    '''
+    Adds all tweet data to a dataframe from a tree and returns it
+    '''
+
+    #init dataframe
+    tweet_df = pd.DataFrame(columns=['created','text','likes','retweets'])
+    
+    #add all tweet data to dataframe
+    for tweet in tqdm(tree.all_nodes_itr()):
+        #check for NULL
+        if tweet.data:
+            tweet_df = tweet_df.append(tweet.data,ignore_index=True)
+    return tweet_df
