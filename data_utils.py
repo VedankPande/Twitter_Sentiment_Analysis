@@ -47,11 +47,15 @@ def get_dataframe(tree):
     '''
 
     #init dataframe
-    tweet_df = pd.DataFrame(columns=['created','text','likes','retweets'])
+    tweet_df = pd.DataFrame(columns=['timestamp','text','likes','retweets'])
     
     #add all tweet data to dataframe
     for tweet in tqdm(tree.all_nodes_itr()):
         #check for NULL
         if tweet.data:
             tweet_df = tweet_df.append(tweet.data,ignore_index=True)
+    tweet_df = tweet_df.sort_values('timestamp')
+    tweet_df['timestamp'] = pd.to_datetime(tweet_df['timestamp'])
+    tweet_df['date'] = tweet_df['timestamp'].dt.date
+    tweet_df['time'] = tweet_df['timestamp'].dt.time
     return tweet_df
