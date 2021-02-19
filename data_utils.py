@@ -47,7 +47,7 @@ def get_dataframe(tree):
     '''
 
     #init dataframe
-    tweet_df = pd.DataFrame(columns=['timestamp','text','likes','retweets'])
+    tweet_df = pd.DataFrame(columns=['timestamp','text','likes','retweets','sentiment'])
     
     #add all tweet data to dataframe
     for tweet in tqdm(tree.all_nodes_itr()):

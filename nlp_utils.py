@@ -29,14 +29,17 @@ def analyze_data(tree_data):
         #add one to prevent 0 likes+retweets to nullify a tweet
         event_score = tweet.data['likes']+(tweet.data['retweets']*0.3)+1
         total_score += sent_score*event_score
+        tweet.data['sentiment'] = sent_score*event_score
         
         for reply in tqdm(tree_data.children(tweet.identifier)):
             
             sent_score = get_sentiment_dict(reply.data['text'])['compound']
             event_score = tweet.data['likes']+(tweet.data['retweets']*0.3)+1
             total_score += sent_score*event_score
+            reply.data['sentiment'] = sent_score*event_score
 
     print(total_score)
+    return tree_data
 
 
 
