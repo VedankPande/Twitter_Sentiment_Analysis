@@ -4,11 +4,22 @@ import pandas as pd
 
 #TODO: Fix code and add dates on x axis
 def plot_df(df):
-    sns.set()
-    for date in set(list(df['date'])):
-        x = df['timestamp'][df['date']==date]
-        x_lims = pd.date_range(date,periods=25,freq='H')
-        y = df['sentiment'][df['date']==date]
-        plt.xticks(x_lims)
-        plt.plot(x,y)
-        plt.show()
+    #init plot
+    fig,ax = plt.subplots()
+
+    #declare data and annotations
+    x = df['timestamp']
+    y = df['sentiment']
+    annotations = df['user']
+    ax.scatter(x,y)
+
+    #add annotations
+    for i,annot in enumerate(annotations):
+        ax.annotate(annot,(x[i],y[i]))
+    
+    #display plot
+    plt.show()
+
+
+if __name__ == "__main__":
+    pass

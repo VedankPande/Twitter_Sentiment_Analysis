@@ -38,10 +38,12 @@ def add_tree_node(tree,tweet,parent=None):
     '''
     Adds a tree node to the treelib Tree object with selected twitter object data\n
     '''
-    data = {'timestamp':tweet.created_at, 'text':clean_tweet(tweet.full_text), 'likes':tweet.favorite_count, 'retweets':tweet.retweet_count}
+    data = {'timestamp':tweet.created_at,'user':tweet.user.screen_name,
+            'text':clean_tweet(tweet.full_text), 'likes':tweet.favorite_count,
+            'retweets':tweet.retweet_count}
     tree.create_node(tweet.id, tweet.id, parent=parent, data=data)
 
-def get_dataframe(tree):
+def get_dataframe(tree):    
     '''
     Adds all tweet data to a dataframe from a tree and returns it
     '''

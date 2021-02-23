@@ -18,15 +18,19 @@ if __name__ == '__main__':
     #keyword argument for tweet search
     parser.add_argument('keyword',type=str,
                         help='keyword used to query the twitter search-enter either a valid twitter handle of keyword(s)')
-    # number of tweets to search/retrieve, def is 10
+    # number of tweets to search/retrieve, default = 10
     parser.add_argument('--num_tweets',type=int,
                         help='number of tweets to return',default=10)
 
     #get arguments in a parser object                                   
     arguments = parser.parse_args()
 
-    # Driver codes
+    # Driver code
     cursor = search_user_status(arguments.keyword,arguments.num_tweets)
     tree = get_user_tweet_replies(cursor)
+
+    tree = analyze_data(tree)
+    save_data(tree,"manutd")
+    plot_df(get_dataframe(tree))
 
 
