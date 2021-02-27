@@ -2,6 +2,8 @@ import pickle
 import regex as re
 import pandas as pd
 from tqdm import tqdm
+import numpy as np
+from sklearn import preprocessing
 
 
 def clean_tweet(tweet)->str:
@@ -61,3 +63,21 @@ def get_dataframe(tree):
     tweet_df['date'] = tweet_df['timestamp'].dt.date
     tweet_df['time'] = tweet_df['timestamp'].dt.time
     return tweet_df
+
+def normalize_sentiment(df):
+    '''
+    normalize sentiment values in dataframe
+    '''
+    #check if df contains 'sentiment' column
+    assert 'sentiment' in df.columns
+
+    min_max_scaler = preprocessing.MinMaxScaler()
+    
+    #reshape column to fit scaler requirements
+    x = np.reshape(df['sentiment'].values,(-1,1))
+    x = min_max_scaler.fit_transform(x)
+
+    #revert shape to original form
+    df['sentiment'] = np.reshape(x,(-1,))
+    return df
+

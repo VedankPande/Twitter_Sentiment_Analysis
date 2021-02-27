@@ -2,15 +2,13 @@ import argparse
 
 from tweepy_test import search_user_status,get_user_tweet_replies,search
 from nlp_utils import analyze_data
-from data_utils import save_data,load_data, get_dataframe
+from data_utils import save_data,load_data, get_dataframe, normalize_sentiment
 from plot import plot_df
 import treelib
 
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
-
-from sklearn import preprocessing
+import numpy as np  
 
 
 if __name__ == '__main__':
@@ -39,13 +37,12 @@ if __name__ == '__main__':
     #load data (during dev)
     tree = load_data("manutd.pickle")
 
+    #convert tree to dataframe
     df = get_dataframe(tree)
-    #normalize sentiment values in dataframe
-    min_max_scaler = preprocessing.MinMaxScaler()
-    x = np.reshape(df['sentiment'].values,(-1,1))
-    x = min_max_scaler.fit_transform(x)
-    df['sentiment'] = np.reshape(x,(-1,))
 
+    #normalize sentiment column
+    df = normalize_sentiment(df)
+    
     #plot dataframe
     plot_df(df)
 
