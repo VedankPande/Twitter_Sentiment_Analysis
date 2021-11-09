@@ -3,10 +3,10 @@ import time
 from treelib import Tree
 from data_utils import add_tree_node
 
-API_KEY = 'P2OwbCH283xgJX8p8LPomlf5O'
-API_SECRET_KEY = '7Mh2sGiIxS55aOSXnIW8oI6u3V99xrtduXAhFO1ZB19tzFvLag'
-ACCESS_TOKEN = '896024023531913217-atwUWmov7IgldZhUGe0WdAKK62aglc2'
-ACCESS_TOKEN_SECRET = '7Jyz6k1KNPvvIaR3sU2DKFeu55ckNeRFVjPiTJL35e5FZ'
+API_KEY = 
+API_SECRET_KEY = 
+ACCESS_TOKEN = 
+ACCESS_TOKEN_SECRET = 
 
 #class for tweepy StreamerListener
 class StreamerListener(tweepy.StreamListener):
